@@ -1,6 +1,7 @@
+import { ILogger } from "../interfaces/ILogger";
 
 
-export abstract class BaseLoggerService {
+export abstract class BaseLoggerService implements ILogger{
 
     public abstract info(...args: any | null): void 
 

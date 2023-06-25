@@ -2,16 +2,19 @@ import { DotenvParseOutput } from 'dotenv';
 import { Router as Router } from 'express';
 import fs from 'fs';
 import { IRouteList, IRoute } from '../common/interfaces/IRoute';
+import { ILogger } from '../common/interfaces/ILogger';
 
 
 export class RouterService {
 
     private config: DotenvParseOutput;
     private _router: Router;
+    private logger: ILogger;
     private typeFile: 'js'|'ts';
 
-    constructor(config: DotenvParseOutput) {
+    constructor(config: DotenvParseOutput, logger: ILogger) {
         this.config = config;
+        this.logger = logger;
         this._router = Router();
 
         this.typeFile = this.config['MOD'] === 'develop' ? 'ts' : 'js';
@@ -38,7 +41,7 @@ export class RouterService {
             } catch(e) {
                 // @TODO throw server error
                 const message = e instanceof Error ? e.message : '';
-                console.log('Error load routes. ', message);
+                this.logger.error(`Error load routes. Message: ${message}`);
             }
         }
 
@@ -49,7 +52,7 @@ export class RouterService {
     private async prepareRoutes(data: IRouteList) {
         if (!Object.keys(data).length) {
             // @TODO throw server error
-            console.log('Error routes')
+            this.logger.error('Not found routes');
         }
 
         const keys = Object.keys(data);
@@ -72,15 +75,16 @@ export class RouterService {
             const controller = new LoadController[route.controller.getClassName()];
 
             if (!controller[route.controllerMethod]) {
-                // @TODO throw server error
-                console.log('Error routes controller method')
+                this.logger.error(`Not found method - ${route.controllerMethod} for class - ${route.controller.getClassName()}`)
+                return;
             }
+
             const handleRoute = controller[route.controllerMethod].bind(controller);
             const functions = (route.middlewares?.length) ? [...route.middlewares, handleRoute] : [handleRoute]
             this._router[route.httpMethod](path, [...functions]);
         } catch(e) {
             // @TODO throw server error
-            console.log('Error routes controller');
+            this.logger.error('Router initialization error');
         }
     }
 
