@@ -1,26 +1,27 @@
 import express, { Express } from 'express';
 import { Server } from 'http';
 import { DotenvParseOutput } from 'dotenv';
+import { RouterService } from './services/RouterService';
+import { IRouterService } from './interfaces/IRouterService';
 
 
 export class Application {
 
-    private server!:    Server;
-    private app:        Express;
-    private port:       number;
-    private config:     DotenvParseOutput;
+    private server!:        Server;
+    private app:            Express;
+    private port:           number;
+    private config:         DotenvParseOutput;
+    private routeService:   IRouterService;
     
     constructor(config: DotenvParseOutput) {
         this.config = config;
         this.port = this.config['PORT'] ? Number(this.config['PORT']) : 1234;
+
+        this.routeService = new RouterService(config);
         this.app = express();
     }
 
     private useMiddleware(): void {
-
-    }
-
-    private useRoutes(): void {
 
     }
 
@@ -43,7 +44,7 @@ export class Application {
         try {
             await this.connectToDB();
             this.useMiddleware();
-            this.useRoutes();
+            await this.routeService.configureRoutes()
         } catch(e) {
 
         }

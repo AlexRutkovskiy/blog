@@ -3,8 +3,10 @@ import { BaseController } from "../common/controller/BaseController";
 
 export class UserController extends BaseController {
 
+    private name: string = 'UserController';
+
     constructor() {
-        super()
+        super();
     }
 
     public login() {}
@@ -12,4 +14,8 @@ export class UserController extends BaseController {
     public register() {}
 
     public logout() {}
+
+    public check() {
+        console.log('Test check!!!!!')
+    }
 }

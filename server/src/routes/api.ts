@@ -29,7 +29,7 @@ const auth = [
 
 
 export const routes: IRouteList = {
-    auth,
+    //auth,
     healthcheck: [
         {
             path: "/",

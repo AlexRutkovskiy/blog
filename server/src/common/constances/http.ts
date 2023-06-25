@@ -1,11 +1,11 @@
 
 
 export enum HTTP_METHODS {
-    POST = 'POST',
-    GET = 'GET',
-    PUT = 'PUT',
-    PATCH = 'PATCH',
-    DELETE = 'DELETE'
+    POST = 'post',
+    GET = 'get',
+    PUT = 'put',
+    PATCH = 'patch',
+    DELETE = 'delete'
 }
 
 export const HTTP_RESPONSE_STATUS = {
