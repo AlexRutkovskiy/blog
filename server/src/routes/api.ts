@@ -30,4 +30,12 @@ const auth = [
 
 export const routes: IRouteList = {
     auth,
+    healthcheck: [
+        {
+            path: "/",
+            httpMethod: HTTP_METHODS.GET,
+            controller: UserController,
+            controllerMethod: 'check'
+        }
+    ]
 };

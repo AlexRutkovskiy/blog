@@ -1,8 +1,13 @@
 import { Application } from './application';
+import { ConfigService } from './services/ConfigService';
 
 async function bootstrap() {
-    const app = new Application(1234);
-    app.run();
+    const config = (new ConfigService()).get();
+    
+    if (config !== null) {
+        const app = new Application(config);
+        app.run();
+    }
 }
 
 bootstrap();
