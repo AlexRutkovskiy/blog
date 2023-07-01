@@ -49,7 +49,8 @@ export class Application {
             this.useMiddleware();
             await this.routeService.configureRoutes()
         } catch(e) {
-
+            const message = e instanceof Error ? e.message : "Server error";
+            this.logger.error(message);
         }
 
         this.useHandleExceptions();    

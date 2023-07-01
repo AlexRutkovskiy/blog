@@ -1,8 +1,8 @@
 import { DotenvParseOutput } from 'dotenv';
 import { Router as Router } from 'express';
-import fs from 'fs';
 import { IRouteList, IRoute } from '../common/interfaces/IRoute';
 import { ILogger } from '../common/interfaces/ILogger';
+import { ServerException } from '../exceptions/ServerException';
 
 
 export class RouterService {
@@ -23,7 +23,7 @@ export class RouterService {
     public async configureRoutes(): Promise<void|null> {
         const types = this.config['ROUTES_TYPE'] ?? null;
         if (!types) {
-            return null;
+            throw ServerException.IntervalServerError(["Not set in config file ROUTER TYPE"])
         }
 
         const loadedRoutes = await this.loadRoutes(types);
@@ -39,9 +39,9 @@ export class RouterService {
                 const { routes } = await require(`../routes/${splitTypes[i]}.${this.typeFile}`); 
                 tmpRoutes = {...tmpRoutes, ...routes};
             } catch(e) {
-                // @TODO throw server error
-                const message = e instanceof Error ? e.message : '';
+                const message = e instanceof Error ? e.message : 'Error load router file';
                 this.logger.error(`Error load routes. Message: ${message}`);
+                throw ServerException.IntervalServerError([message]);
             }
         }
 
@@ -51,8 +51,8 @@ export class RouterService {
 
     private async prepareRoutes(data: IRouteList) {
         if (!Object.keys(data).length) {
-            // @TODO throw server error
             this.logger.error('Not found routes');
+            throw ServerException.IntervalServerError(['Not found routes'])
         }
 
         const keys = Object.keys(data);
@@ -75,16 +75,18 @@ export class RouterService {
             const controller = new LoadController[route.controller.getClassName()];
 
             if (!controller[route.controllerMethod]) {
-                this.logger.error(`Not found method - ${route.controllerMethod} for class - ${route.controller.getClassName()}`)
-                return;
+                const message = `Not found method - ${route.controllerMethod} for class - ${route.controller.getClassName()}`;
+                this.logger.error(message)
+                throw new Error(message)
             }
 
             const handleRoute = controller[route.controllerMethod].bind(controller);
             const functions = (route.middlewares?.length) ? [...route.middlewares, handleRoute] : [handleRoute]
             this._router[route.httpMethod](path, [...functions]);
         } catch(e) {
-            // @TODO throw server error
-            this.logger.error('Router initialization error');
+            const message = e instanceof Error ? e.message : 'Router initialization error';
+            this.logger.error(message);
+            throw ServerException.IntervalServerError([message]);
         }
     }
 
